@@ -1,0 +1,13 @@
+/**
+ * Styles for core/post-terms when the taxonomy has rewrite disabled.
+ *
+ * The <a> elements are kept intact so all editor-applied styles — link color,
+ * typography, border, spacing — cascade through unchanged. Only the cursor is
+ * overridden: the link points to "#" and should not suggest it is clickable.
+ */
+
+.has-ptbu-unlinked a {
+	cursor: default;
+	text-decoration: none !important;
+	outline: none !important;
+}
