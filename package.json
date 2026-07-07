@@ -1,6 +1,6 @@
 {
     "name": "post-terms-block-unlinked",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Hooks into the core Post Terms block to render terms as non-linked elements when the taxonomy has URL rewrites disabled.",
     "author": "carstenbach",
     "license": "GPL-2.0-or-later",

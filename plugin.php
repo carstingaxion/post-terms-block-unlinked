@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Post Terms Block Unlinked
  * Description:       Hooks into the core Post Terms block to render terms as non-linked elements when the taxonomy has URL rewrites disabled.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            carstenbach
