@@ -38,18 +38,26 @@ const withPostTermsPanel = createHigherOrderComponent( ( BlockEdit ) => {
 				<BlockEdit { ...props } />
 				<InspectorControls>
 					<PanelBody
-						title={ __( 'Post Terms Block Unlinked', 'post-terms-block-unlinked' ) }
+						title={ __(
+							'Post Terms Block Unlinked',
+							'post-terms-block-unlinked'
+						) }
 						initialOpen={ true }
 					>
 						<ToggleControl
-							label={ __( 'Neutralise links', 'post-terms-block-unlinked' ) }
+							label={ __(
+								'Neutralise links',
+								'post-terms-block-unlinked'
+							) }
 							help={ __(
 								'Replace term links with inert elements on the frontend. Enable when the taxonomy has URL rewrites disabled.',
 								'post-terms-block-unlinked'
 							) }
 							checked={ !! props.attributes.neutraliseLinks }
 							onChange={ ( value ) =>
-								props.setAttributes( { neutraliseLinks: value } )
+								props.setAttributes( {
+									neutraliseLinks: value,
+								} )
 							}
 							__nextHasNoMarginBottom
 						/>
