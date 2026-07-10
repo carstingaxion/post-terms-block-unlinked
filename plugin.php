@@ -1,104 +1,60 @@
 <?php
 /**
  * Plugin Name:       Post Terms Block Unlinked
- * Description:       Hooks into the core Post Terms block to render terms as non-linked elements when the taxonomy has URL rewrites disabled.
- * Version:           0.1.1
- * Requires at least: 6.2
+ * Plugin URI:        https://github.com/carstingaxion/post-terms-block-unlinked
+ * Description:       Extends the core Post Terms block with GatherPress-aware super-powers: neutralise term links per block, and rewrite shadow-taxonomy term links to their source post permalinks.
+ * Version:           0.1.0
+ * Requires at least: 6.4
  * Requires PHP:      7.4
+ * Requires plugins:  gatherpress
  * Author:            carstenbach
  * License:           GPLv2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       post-terms-block-unlinked
+ * Domain Path:       /languages
  *
  * @package PostTermsBlockUnlinked
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit; // @codeCoverageIgnore
+
+// Constants.
+define( 'POST_TERMS_BLOCK_UNLINKED_VERSION', current( get_file_data( __FILE__, array( 'Version' ), 'plugin' ) ) );
+define( 'POST_TERMS_BLOCK_UNLINKED_FILE', __FILE__ );
 
 /**
- * Filters the rendered output of core/post-terms.
+ * Adds the PostTermsBlockUnlinked namespace to the GatherPress autoloader.
  *
- * When the queried taxonomy has rewrite disabled, neutralises the term links
- * by replacing their href with "#" and adds a modifier class to the wrapper
- * so the cursor can be reset to default via CSS.
+ * Hooks into the 'gatherpress_autoloader' filter so the GatherPress core
+ * autoloader can resolve PostTermsBlockUnlinked\* class names to files
+ * under this plugin's includes/classes/ directory.
  *
- * All existing attributes — classes (including is-style-* set in the editor),
- * inline styles, and data-* attributes — are preserved exactly because every
- * mutation goes through WP_HTML_Tag_Processor rather than regex substitution.
+ * @since 0.1.0
  *
- * @param string   $block_content The block HTML.
- * @param array    $block         The full block, including name and attributes.
- * @param WP_Block $instance      The block instance.
- * @return string  Filtered block HTML.
+ * @param array<string, string> $namespaces Namespace-to-root-path map.
+ * @return array<string, string> Modified map with PostTermsBlockUnlinked added.
  */
-if ( ! function_exists( 'ptbu_filter_post_terms_render' ) ) {
-	function ptbu_filter_post_terms_render( string $block_content, array $block, WP_Block $instance ): string {
-		$taxonomy = isset( $block['attrs']['term'] ) ? sanitize_key( $block['attrs']['term'] ) : 'category';
+function post_terms_block_unlinked_autoloader( array $namespaces ): array {
+	$namespaces['PostTermsBlockUnlinked'] = __DIR__;
 
-		if ( ! taxonomy_exists( $taxonomy ) ) {
-			return $block_content;
-		}
-
-		$tax_obj = get_taxonomy( $taxonomy );
-
-		// If rewrite is enabled, leave the core output untouched.
-		if ( ! empty( $tax_obj->rewrite ) ) {
-			return $block_content;
-		}
-
-		// Enqueue the stylesheet on demand — only when this branch actually
-		// runs. Styles enqueued after wp_head are printed by print_late_styles()
-		// in wp_footer, which is correct for a small rule like this.
-		wp_enqueue_style(
-			'ptbu-unlinked',
-			plugin_dir_url( __FILE__ ) . 'assets/badges.css',
-			array(),
-			'0.1.0'
-		);
-
-		// Use WP_HTML_Tag_Processor for all mutations so every existing
-		// attribute — classes, inline styles, data-* — is preserved exactly.
-		$processor = new \WP_HTML_Tag_Processor( $block_content );
-
-		while ( $processor->next_tag() ) {
-			switch ( $processor->get_tag() ) {
-
-				case 'DIV':
-					// Add the unlinked-mode modifier to the block wrapper.
-					// add_class() appends safely; it never drops existing classes.
-					if ( $processor->has_class( 'taxonomy-' . $taxonomy ) ) {
-						$processor->add_class( 'has-ptbu-unlinked' );
-					}
-					break;
-
-				case 'A':
-					// Neutralise the link: replace the destination with "#" so the
-					// element stays in place and inherits all editor styles (link
-					// color, typography, border…), but points nowhere.
-					$processor->set_attribute( 'href', '#' );
-					break;
-			}
-		}
-
-		return $processor->get_updated_html();
-	}
+	return $namespaces;
 }
-add_filter( 'render_block_core/post-terms', 'ptbu_filter_post_terms_render', 10, 3 );
+add_filter( 'gatherpress_autoloader', 'post_terms_block_unlinked_autoloader' );
 
 /**
- * Enqueues the stylesheet in the block editor so the preview is accurate
- * when editing templates that contain core/post-terms for non-rewrite taxonomies.
+ * Initializes the plugin once all plugins are loaded.
+ *
+ * Boots only when GatherPress core is active, identified by the presence
+ * of the GATHERPRESS_VERSION constant.
+ *
+ * @since 0.1.0
+ * @return void
  */
-if ( ! function_exists( 'ptbu_enqueue_editor_styles' ) ) {
-	function ptbu_enqueue_editor_styles(): void {
-		wp_enqueue_style(
-			'ptbu-unlinked-editor',
-			plugin_dir_url( __FILE__ ) . 'assets/badges.css',
-			array(),
-			'0.1.0'
-		);
+function post_terms_block_unlinked_setup(): void {
+	if ( defined( 'GATHERPRESS_VERSION' ) ) {
+		\PostTermsBlockUnlinked\Block::get_instance();
+		\PostTermsBlockUnlinked\Shadow_Links::get_instance();
 	}
 }
-add_action( 'enqueue_block_editor_assets', 'ptbu_enqueue_editor_styles' );
+add_action( 'plugins_loaded', 'post_terms_block_unlinked_setup' );
