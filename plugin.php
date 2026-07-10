@@ -3,7 +3,7 @@
  * Plugin Name:       Post Terms Block Unlinked
  * Plugin URI:        https://github.com/carstingaxion/post-terms-block-unlinked
  * Description:       Extends the core Post Terms block with GatherPress-aware super-powers: neutralise term links per block, and rewrite shadow-taxonomy term links to their source post permalinks.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Requires at least: 6.4
  * Requires PHP:      7.4
  * Requires plugins:  gatherpress
