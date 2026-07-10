@@ -1,7 +1,7 @@
 {
     "name": "post-terms-block-unlinked",
     "version": "0.1.0",
-    "description": "Hooks into the core Post Terms block to render terms as non-linked elements when the taxonomy has URL rewrites disabled.",
+    "description": "Extends the core Post Terms block with GatherPress-aware super-powers: neutralise term links per block, and rewrite shadow-taxonomy term links to their source post permalinks.",
     "author": "carstenbach",
     "license": "GPL-2.0-or-later",
     "keywords": [

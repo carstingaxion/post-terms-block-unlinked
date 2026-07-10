@@ -12,19 +12,7 @@
 
 ## Description
 
-A GatherPress companion plugin that extends the core `core/post-terms` block with editor-controlled super-powers — without replacing the block or sacrificing any of its native styling controls.
-
-**Why this approach?**
-
-By hooking into the existing core block instead of registering a separate custom block, every core block support is preserved:
-
-- ✅ Color (text, background, gradients, link color)
-- ✅ Typography (font size, font family, weight, letter spacing, etc.)
-- ✅ Spacing (margin, padding)
-- ✅ Border (radius, color, width, style)
-- ✅ Separator character, taxonomy selector, block styles
-- ✅ Full compatibility with Query Loop
-- ✅ Editor preview styling
+Extends the core Post Terms block with GatherPress-aware super-powers: neutralise term links per block, and rewrite shadow-taxonomy term links to their source post permalinks — without replacing the block or sacrificing any of its native styling controls.
 
 No new block to learn — just activate the plugin and the core Post Terms block gains new capabilities.
 
