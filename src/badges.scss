@@ -6,8 +6,11 @@
  * overridden: the link points to "#" and should not suggest it is clickable.
  */
 
-.has-ptbu-unlinked a {
-	cursor: default;
-	text-decoration: none !important;
-	outline: none !important;
+.has-ptbu-unlinked {
+	a {
+		cursor: default;
+		text-decoration: none !important;
+		outline: none !important;
+		pointer-events: none;
+	}
 }

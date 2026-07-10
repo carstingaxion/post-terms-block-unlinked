@@ -1,7 +1,8 @@
 # Post Terms Block Unlinked
 
 **Contributors:** carstenbach  
-**Tags:** post-terms  
+**Tags:** post-terms, gatherpress  
+**Requires plugins:** gatherpress  
 **Tested up to:** 6.9  
 **Stable tag:** 0.1.0  
 **License:** GPLv2 or later  
@@ -11,71 +12,72 @@
 
 ## Description
 
-This lightweight plugin enhances the core `core/post-terms` block without replacing it. It uses the `render_block_core/post-terms` filter to intercept the block's output and conditionally neutralise term links when the taxonomy does not support archive URLs.
-
-**Motivation:**
-
-- https://github.com/carstingaxion/gatherpress-productions/issues/2
-- https://github.com/WordPress/gutenberg/issues/50904
-- https://github.com/WordPress/gutenberg/pull/50946
-
-**How it works:**
-
-- When the selected taxonomy has `rewrite` **enabled** (the default for categories, tags, etc.), the block output is left completely untouched — terms remain as linked anchors pointing to their archive pages.
-- When the selected taxonomy has `rewrite` **disabled** (common for internal or organisational taxonomies), the plugin replaces each term link's `href` with `#` and suppresses the pointer cursor, keeping all other editor-applied styles intact.
-
-**Why keep the `<a>` element?**
-
-Replacing links with `<span>` elements would discard all editor-applied link styles — color, typography, border, spacing. By keeping the `<a>` element and only neutralising the `href`, every style the editor applied cascades through unchanged.
+A GatherPress companion plugin that extends the core `core/post-terms` block with editor-controlled super-powers — without replacing the block or sacrificing any of its native styling controls.
 
 **Why this approach?**
 
-By hooking into the existing core block instead of creating a separate custom block, all core block supports are preserved:
+By hooking into the existing core block instead of registering a separate custom block, every core block support is preserved:
 
 - ✅ Color (text, background, gradients, link color)
 - ✅ Typography (font size, font family, weight, letter spacing, etc.)
 - ✅ Spacing (margin, padding)
 - ✅ Border (radius, color, width, style)
-- ✅ Separator character
-- ✅ Taxonomy selector
-- ✅ Block styles and `className` (including `is-style-*` variations)
+- ✅ Separator character, taxonomy selector, block styles
 - ✅ Full compatibility with Query Loop
 - ✅ Editor preview styling
 
-No new block to learn — just activate the plugin and the core Post Terms block becomes smarter.
+No new block to learn — just activate the plugin and the core Post Terms block gains new capabilities.
+
+## Super-powers
+
+### 1 · Neutralise Links
+
+A toggle in the block sidebar ("Post Terms Block Unlinked → Neutralise links") lets editors disable term links on a per-block basis.
+
+When enabled:
+
+- Each term link's `href` is replaced with `#` on the frontend.
+- The `has-ptbu-unlinked` modifier class is added to the block wrapper, which resets the cursor and removes underline decoration.
+- The `<a>` element is kept intact so all editor-applied link styles (color, typography, border, spacing) cascade through unchanged.
+- The frontend stylesheet is loaded on demand — only when at least one block on the page has the toggle enabled.
+
+When disabled (the default), the block output is left completely untouched.
+
+### 2 · Shadow-taxonomy source links
+
+GatherPress shadow-source taxonomies (`_gatherpress_venue`, `_gatherpress_production`, etc.) are always registered with `rewrite=false`, so WordPress has no archive URL for their terms. The core `core/post-terms` block renders those terms as anchors pointing to non-existent term archives.
+
+This super-power automatically detects when a Post Terms block is displaying a GP shadow taxonomy and rewrites each term's href to the **source post's own permalink** — so a venue term links to its venue post, a production term links to its production post, and so on.
+
+- Detection is taxonomy-driven: any taxonomy whose slug starts with `_` and whose derived post type declares `gatherpress-shadow-source` support is treated as a shadow taxonomy.
+- No block attribute or editor toggle required — the rewrite happens automatically for every shadow-taxonomy Post Terms block on the frontend.
+- Runs at filter priority 5, before the Neutralise Links filter (priority 10), so both super-powers can be combined on the same block.
 
 ## Requirements
 
-- WordPress 6.2 or later
+- WordPress 6.4 or later
 - PHP 7.4 or later
+- GatherPress
 
 ## Installation
 
-1. Upload the `post-terms-block-unlinked` folder to `/wp-content/plugins/`.
-2. Activate the plugin through the **Plugins** screen in WordPress.
-3. That's it. The core Post Terms block will now automatically unlink terms for taxonomies with rewrite disabled.
+1. Ensure GatherPress is installed and active.
+2. Upload the `post-terms-block-unlinked` folder to `/wp-content/plugins/`.
+3. Activate the plugin through the **Plugins** screen in WordPress.
 
 ## Frequently Asked Questions
 
-**Do I need to change anything in the editor?**
-
-No. The plugin works automatically. Just use the core Post Terms block as you normally would. If the selected taxonomy has rewrite disabled, the frontend output will show unlinked terms.
-
-**Which taxonomies are affected?**
-
-Only taxonomies where `rewrite` is explicitly set to `false`. Standard taxonomies like categories and tags have rewrite enabled by default and will continue to show as linked anchors.
-
 **Does this work inside Query Loop blocks?**
 
-Yes, fully. The filter runs on every instance of the `core/post-terms` block regardless of context.
+Yes, fully. The filter runs on every instance of `core/post-terms` regardless of context, including nested Query Loop blocks.
 
-**Can I customise the styles?**
+**Can I customise the unlinked styles?**
 
-Yes. The block wrapper receives the class `has-ptbu-unlinked` when in unlinked mode. Target `.has-ptbu-unlinked a` in your theme's CSS to override the default `cursor: default` or add further styling.
+Yes. Target `.has-ptbu-unlinked a` in your theme's CSS to override or extend the default `cursor: default` / no-underline rules.
 
-**Is the stylesheet always loaded?**
+**Is the frontend stylesheet always loaded?**
 
-No. The stylesheet is enqueued on demand inside the render filter — only when a `core/post-terms` block with a rewrite-disabled taxonomy is actually present on the page. It is printed in the footer via WordPress's late-style mechanism.
+No. It is enqueued on demand inside the render filter — only when at least one block on the current page has "Neutralise links" enabled. It is printed in the footer via WordPress's late-style mechanism.
 
 ## Changelog
 
